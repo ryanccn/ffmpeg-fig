@@ -37,9 +37,9 @@ for (const rawOption of rawOptions) {
   if (genOptions.filter((k) => k.name === mainPart[0]).length === 0) {
     genOptions.push({
       name: mainPart[0],
-      args: mainPart.slice(1).map((k) => ({
-        name: k,
-      })),
+      args: {
+        name: mainPart.slice(1).join(" "),
+      },
       description,
       ...description
         ? description.toLowerCase().search("deprecated") > -1
