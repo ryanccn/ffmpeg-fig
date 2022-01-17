@@ -53,6 +53,10 @@ const completionSpec: Fig.Spec = {
   name: "ffmpeg",
   description: "FFmpeg is a great tool!",
 
+  parserDirectives: {
+    flagsArePosixNoncompliant: true,
+  },
+
   args: {
     name: "outfile",
     description: "Output file",
