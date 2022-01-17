@@ -10,12 +10,6 @@ console.timeEnd("read help text in");
 const HELP_LINES = HELP_TEXT.split("\n").filter(Boolean);
 
 const rawOptions = HELP_LINES
-  .slice(
-    HELP_LINES.findIndex((value) =>
-      value === "Print help / information / capabilities:"
-    ),
-    HELP_LINES.findIndex((value) => value === "AVCodecContext AVOptions:"),
-  )
   .filter(Boolean)
   .filter((k) => k.startsWith("-"));
 
