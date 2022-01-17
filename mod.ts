@@ -1,6 +1,6 @@
 /// <reference types="./fig.d.ts" />
 
-import { getHelpText } from "./parser.ts";
+import { getHelpText } from "./getter.ts";
 import { generateSpec } from "./spec.ts";
 
 console.time("read help text in");
