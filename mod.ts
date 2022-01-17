@@ -42,7 +42,9 @@ for (const rawOption of rawOptions) {
       })),
       description,
       ...description
-        ? description.search("Deprecated") > -1 ? { deprecated: true } : {}
+        ? description.toLowerCase().search("deprecated") > -1
+          ? { deprecated: true }
+          : {}
         : {},
     });
   }
