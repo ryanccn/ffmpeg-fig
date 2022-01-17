@@ -37,9 +37,12 @@ const format = async (str: string) => {
   const [status, stdout] = await Promise.all([proc.status(), proc.output()]);
 
   if (!status.success) {
-    throw new Error(
-      `error in running \`deno fmt\``,
+    console.error(
+      "%sError in formatting, skipping...%s",
+      "\x1b[31m",
+      "\x1b[0m",
     );
+    return str;
   }
 
   return new TextDecoder().decode(stdout);
@@ -74,23 +77,34 @@ const completionSpec: Fig.Spec = {
           : ""
       }
       ${
-        option.args && Array.isArray(option.args) && option.args.length > 0
+        option.args && !Array.isArray(option.args) && option.args.name
           ? `
-        args: [
-          ${
-            option.args.map((arg) =>
-              `{
-            name: "${arg.name}",
+        args:
+              ${`{
+            name: "${option.args.name}",
             ${
-                arg.description !== undefined
-                  ? `description: ${conventionify(arg.description)},`
-                  : ""
-              }
-            ${arg.template !== undefined ? `template: "${arg.template}",` : ""}
-          }`
-            ).join(",\n")
+            option.args.description !== undefined
+              ? `description: ${conventionify(option.args.description)},`
+              : ""
           }
-      ],`
+            ${
+            option.args.template !== undefined
+              ? `template: "${option.args.template}",`
+              : ""
+          }
+            ${
+            option.args.generators !== undefined &&
+              !Array.isArray(option.args.generators)
+              ? `generators: {
+                script: "${option.args.generators.script}",
+                postProcess: ${
+                option.args.generators.postProcess
+                  ? option.args.generators.postProcess.toString()
+                  : "undefined"
+              }},`
+              : ""
+          }
+          }`},`
           : "" // no valid arguments, return nothing
       }
     }`;

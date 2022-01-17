@@ -2,6 +2,7 @@
 
 import { getHelpText } from "./getter.ts";
 import { generateSpec } from "./spec.ts";
+import { codecGenerator } from "./codecGenerator.ts";
 
 console.time("read help text in");
 const HELP_TEXT = await getHelpText();
@@ -28,11 +29,18 @@ for (const rawOption of rawOptions) {
   const mainPart = splitted[0].split(" ");
   const description = splitted[1];
 
+  const argName = mainPart.slice(1).join(" ");
+
   if (genOptions.filter((k) => k.name === mainPart[0]).length === 0) {
     genOptions.push({
       name: mainPart[0],
       args: {
-        name: mainPart.slice(1).join(" "),
+        name: argName,
+        ...((argName === "codec")
+          ? {
+            generators: codecGenerator,
+          }
+          : {}),
       },
       description,
       ...description
