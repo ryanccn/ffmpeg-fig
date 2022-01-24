@@ -1,8 +1,8 @@
-/// <reference types="./fig.d.ts" />
+import * as Fig from "./fig.types.ts";
 
 import { getHelpText } from "./getter.ts";
 import { generateSpec } from "./spec.ts";
-import { codecGenerator } from "./codecGenerator.ts";
+import { codecGenerator, deviceGenerator } from "./generators.ts";
 
 console.time("read help text in");
 const HELP_TEXT = await getHelpText();
@@ -39,6 +39,10 @@ for (const rawOption of rawOptions) {
         ...((argName === "codec")
           ? {
             generators: codecGenerator,
+          }
+          : (argName === "device")
+          ? {
+            generators: deviceGenerator,
           }
           : {}),
       },

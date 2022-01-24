@@ -1,4 +1,4 @@
-/// <reference types="./fig.d.ts" />
+import * as Fig from "./fig.types.ts";
 
 const safifyStr = (str: string): string => str.replaceAll('"', '\\"');
 const safifyArr = (arr: string[]): string[] => arr.map(safifyStr);
