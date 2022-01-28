@@ -1,3 +1,5 @@
+import { error, timeEnd, timeStart } from "./utils.ts";
+
 const run = async (cmd: string[]): Promise<string> => {
   const p = Deno.run({
     cmd,
@@ -7,18 +9,20 @@ const run = async (cmd: string[]): Promise<string> => {
   const [status, stdout] = await Promise.all([p.status(), p.output()]);
 
   if (!status.success) {
-    throw new Error(
-      `error in running \`${cmd.map((k) => `"${k}"`).join(" ")}\` from ffmpeg`,
+    error(
+      `error in running \`${cmd.map((k) => `"${k}"`).join(" ")}\``,
     );
+    Deno.exit(1);
   }
 
   return new TextDecoder().decode(stdout);
 };
 
+/** Get the help text from FFmpeg */
 export const getHelpText = async () => {
-  return await run(["ffmpeg", "-h", "full"]);
-};
+  timeStart("getHelpText");
+  const ret = await run(["ffmpeg", "-h", "full"]);
+  timeEnd("getHelpText");
 
-export const getDevices = async () => {
-  return await run(["ffmpeg", "-devices"]);
+  return ret;
 };

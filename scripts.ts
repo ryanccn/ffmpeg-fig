@@ -4,7 +4,7 @@ export default <ScriptsConfiguration> {
   scripts: {
     build: {
       cmd: "mod.ts",
-      allow: ["run", "read", "write"],
+      allow: ["all"],
       desc: "Just build the spec",
     },
     copy: {

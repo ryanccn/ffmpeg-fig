@@ -1,15 +1,16 @@
+import { timeEnd, timeStart, warn } from "./utils.ts";
 import * as Fig from "./fig.types.ts";
 
 const safifyStr = (str: string): string => str.replaceAll('"', '\\"');
 const safifyArr = (arr: string[]): string[] => arr.map(safifyStr);
 
-function safify<T extends string | string[] | undefined>(str: T): T {
-  // @ts-expect-error This works, whatever
-  return str !== undefined
-    ? (Array.isArray(str)) ? safifyArr(str) : safifyStr(str)
-    : undefined;
-}
+/* Make a string (or a list of strings) safe by escaping all of the double quotes */
+const safify = <T extends string | string[]>(str: T): T => {
+  // @ts-expect-error This should work but it doesn't.
+  return (typeof str === "string") ? safifyStr(str) : safifyArr(str);
+};
 
+/** Make a description string follow Fig's conventions and appease ESLint */
 const conventionify = (str: string) => {
   let ret = str;
 
@@ -24,7 +25,10 @@ const conventionify = (str: string) => {
   return ret;
 };
 
+/** Format a string of TypeScript / JavaScript using `deno fmt` by running the Deno CLI behind the scenes */
 const format = async (str: string) => {
+  timeStart("format");
+
   const proc = Deno.run({
     cmd: ["deno", "fmt", "-"],
     stdin: "piped",
@@ -37,24 +41,30 @@ const format = async (str: string) => {
   const [status, stdout] = await Promise.all([proc.status(), proc.output()]);
 
   if (!status.success) {
-    console.error(
-      "%sError in formatting, skipping...%s",
-      "\x1b[31m",
-      "\x1b[0m",
+    warn(
+      "Error in formatting, skipping...",
     );
+
     return str;
   }
+
+  timeEnd("format");
 
   return new TextDecoder().decode(stdout);
 };
 
+/** Generate a TypeScript source spec from a list of options
+ * @param options A list of options
+ */
 export const generateSpec = async (options: Fig.Option[]) => {
-  return await format(`
+  timeStart("generateSpec");
+
+  const original = `
 /* eslint-disable @withfig/fig-linter/no-useless-arrays */
 
 const completionSpec: Fig.Spec = {
   name: "ffmpeg",
-  description: "FFmpeg is a great tool!",
+  description: "Play, record, convert, and stream audio and video",
 
   parserDirectives: {
     flagsArePosixNoncompliant: true,
@@ -114,5 +124,9 @@ const completionSpec: Fig.Spec = {
 };
 
 export default completionSpec;
-  `);
+  `;
+
+  timeEnd("generateSpec");
+
+  return await format(original);
 };

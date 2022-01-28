@@ -3,11 +3,11 @@ import * as Fig from "./fig.types.ts";
 import { getHelpText } from "./getter.ts";
 import { generateSpec } from "./spec.ts";
 import { codecGenerator, deviceGenerator } from "./generators.ts";
+import { timeEnd, timeStart } from "./utils.ts";
 
-console.time("read help text in");
+timeStart("main");
+
 const HELP_TEXT = await getHelpText();
-console.timeEnd("read help text in");
-
 const HELP_LINES = HELP_TEXT.split("\n").filter(Boolean);
 
 const rawOptions = HELP_LINES
@@ -23,7 +23,7 @@ const genOptions: Fig.Option[] = [{
   }],
 }];
 
-console.time("generated options in");
+timeStart("parseOptions");
 for (const rawOption of rawOptions) {
   const splitted = rawOption.split(/  +/g).filter(Boolean);
   const mainPart = splitted[0].split(" ");
@@ -55,8 +55,12 @@ for (const rawOption of rawOptions) {
     });
   }
 }
-console.timeEnd("generated options in");
+timeEnd("parseOptions");
 
-console.time("generated spec in");
-await Deno.writeTextFile("ffmpeg.ts", await generateSpec(genOptions));
-console.timeEnd("generated spec in");
+const generatedSpec = await generateSpec(genOptions);
+
+timeStart("writeFile");
+await Deno.writeTextFile("ffmpeg.ts", generatedSpec);
+timeEnd("writeFile");
+
+timeEnd("main");

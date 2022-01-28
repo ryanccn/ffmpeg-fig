@@ -15,6 +15,8 @@ const generatorTmpl = (script: string) => {
   };
 };
 
+/** A Fig generator for codecs */
 export const codecGenerator: Fig.Generator = generatorTmpl("ffmpeg -codecs");
 
+/** A Fig generator for devices */
 export const deviceGenerator: Fig.Generator = generatorTmpl("ffmpeg -devices");
