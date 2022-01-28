@@ -3,9 +3,9 @@ import * as Fig from "./fig.types.ts";
 import { getHelpText } from "./getter.ts";
 import { generateSpec } from "./spec.ts";
 import { codecGenerator, deviceGenerator } from "./generators.ts";
-import { timeEnd, timeStart } from "./utils.ts";
 
-timeStart("main");
+import { timeEnd, timeStart } from "./utils.ts";
+import { bold, green } from "./_deps.ts";
 
 const HELP_TEXT = await getHelpText();
 const HELP_LINES = HELP_TEXT.split("\n").filter(Boolean);
@@ -63,4 +63,4 @@ timeStart("writeFile");
 await Deno.writeTextFile("ffmpeg.ts", generatedSpec);
 timeEnd("writeFile");
 
-timeEnd("main");
+console.log(green(`Wrote completion spec to ${bold("./ffmpeg.ts")}`));

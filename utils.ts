@@ -1,27 +1,35 @@
+import { blue, bold, green, Kia, red, yellow } from "./_deps.ts";
+
 export const log = (str: string): void => {
-  console.log(`%c${str}`, "color: skyblue;");
+  console.log(blue(str));
 };
 
 export const warn = (str: string): void => {
-  console.warn(`%c${str}`, "color: yellow;");
+  console.warn(yellow(str));
 };
 
 export const error = (str: string): void => {
-  console.error(`%c${str}`, "color: red; font-weight: bold;");
+  console.error(bold(red(str)));
 };
 
-const tracker: Record<string, number> = {};
+const startTime: Record<string, number> = {};
+const spinner: Record<string, Kia> = {};
 
 export const timeStart = (label: string): void => {
-  tracker[label] = performance.now();
+  spinner[label] = new Kia({
+    text: `task ${bold(label)} ongoing`,
+  });
+  spinner[label].start();
+
+  startTime[label] = performance.now();
 };
 export const timeEnd = (label: string): void => {
-  console.log(
-    `task %c${label}%c done in %c${
-      (performance.now() - tracker[label]).toFixed(2)
-    }ms`,
-    "font-weight: bold;",
-    "",
-    "color: green;",
+  spinner[label].stopWithFlair(
+    `task ${bold(label)} done in ${
+      green(`${(performance.now() - startTime[label]).toFixed(2)}ms`)
+    }`,
+    "✔",
   );
+
+  delete startTime[label];
 };
