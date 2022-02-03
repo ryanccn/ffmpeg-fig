@@ -6,13 +6,14 @@ import { Spinner, wait } from "https://deno.land/x/wait@0.1.12/mod.ts";
 import {
   bold,
   green,
+  red,
   yellow,
 } from "https://deno.land/std@0.123.0/fmt/colors.ts";
 
 const BOT_TOKEN = Deno.env.get("BOT_TOKEN");
 
 if (!BOT_TOKEN) {
-  console.error("No BOT_TOKEN provided!");
+  console.error(red("No BOT_TOKEN provided!"));
   Deno.exit(1);
 }
 
@@ -40,15 +41,35 @@ const fetchGitHub = async (
   return await r.json();
 };
 
-const stepSpinners: { [name: string]: Spinner } = {};
+const stepSpinners: { [id: string]: Spinner } = {};
+const stepStartTimes: { [id: string]: number } = {};
+
 const stepStart = (id: string, display: string) => {
   const spinner = wait(display);
   spinner.start();
   stepSpinners[id] = spinner;
+  stepStartTimes[id] = performance.now();
 };
 const stepEnd = (id: string) => {
-  stepSpinners[id].succeed(`${id} done!`);
+  stepSpinners[id].succeed(
+    `${id} done in ${(performance.now() - stepStartTimes[id]).toFixed(1)}ms!`,
+  );
+
+  delete stepSpinners[id];
+  delete stepStartTimes[id];
 };
+
+stepStart("check-pr", "Checking for existing PRs...");
+const existingPulls: unknown[] = await fetchGitHub(
+  `/repos/withfig/autocomplete/pulls?head=${
+    encodeURIComponent("ryanccn-bot:master")
+  }`,
+);
+if (existingPulls.length > 0) {
+  console.warn(yellow("PR already exists, exiting"));
+  Deno.exit(0);
+}
+stepEnd("check-pr");
 
 stepStart("read-file", "Reading two versions of the files");
 
@@ -62,16 +83,6 @@ stepEnd("read-file");
 
 if (oldContents.content === newContents) {
   console.warn(yellow("Content of files are same, no need to open PR"));
-  Deno.exit(0);
-}
-
-const existingPulls: unknown[] = await fetchGitHub(
-  `/repos/withfig/autocomplete/pulls?head=${
-    encodeURIComponent("ryanccn-bot:master")
-  }`,
-);
-if (existingPulls.length > 0) {
-  console.warn(yellow("PR already exists, exiting"));
   Deno.exit(0);
 }
 
@@ -128,5 +139,32 @@ await fetchGitHub(
 );
 
 stepEnd("pr");
+
+stepStart("readme", "Updating README");
+
+const oldREADME: { content: string; sha: string } = await fetchGitHub(
+  "/repos/withfig/autocomplete/contents/src/ffmpeg.ts",
+);
+oldREADME.content = new TextDecoder().decode(decode(oldContents.content));
+const newREADME = oldREADME.content.split("\n").map((line) => {
+  if (line.startsWith("**Last updated:")) {
+    return `**Last updated: ${new Date().toUTCString()}`;
+  }
+  return line;
+}).join("\n");
+
+await fetchGitHub(
+  "/repos/ryanccn/ffmpeg-fig/contents/README.md",
+  {
+    method: "PUT",
+    body: JSON.stringify({
+      message: "chore(automated): update README",
+      content: encode(newREADME),
+      sha: oldREADME.sha,
+    }),
+  },
+);
+
+stepEnd("readme");
 
 console.log(bold(green("done!")));

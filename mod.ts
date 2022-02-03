@@ -17,6 +17,7 @@ const rawOptions = HELP_LINES
 const genOptions: Fig.Option[] = [{
   name: "-i",
   description: "Input file",
+  isRequired: true,
   args: [{
     name: "infile",
     template: "filepaths",
