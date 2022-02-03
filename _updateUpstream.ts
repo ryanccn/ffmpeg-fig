@@ -1,3 +1,14 @@
+/**
+ * Basically, what this script does is:
+ *
+ * (It assumes that the fork `ryanccn-bot/autocomplete` is always existent)
+ *
+ * 1. Check if the current version and the version in the fork are equal
+ * 2. If not, push the new content to the fork
+ * 3. If there isn't a pull request open, open one
+ * 4. Update the README in `ryanccn/ffmpeg-fig`
+ */
+
 import {
   decode,
   encode,
