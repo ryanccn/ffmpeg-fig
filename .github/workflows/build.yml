@@ -19,3 +19,5 @@ jobs:
 
       - name: Open a PR (if necessary)
         run: vr update-upstream
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
