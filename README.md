@@ -1,6 +1,6 @@
 # ffmpeg-fig
 
-**Last updated: Thu, 03 Feb 2022 11:53:53 GMT**
+**Last updated: Thu, 03 Feb 2022 12:14:18 GMT**
 
 A Deno script that generates FFmpeg's Fig completion spec!
 
