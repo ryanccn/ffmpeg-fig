@@ -1,4 +1,4 @@
-export { default as Kia } from "https://deno.land/x/kia@0.3.0/mod.ts";
+export { Spinner, wait } from "https://deno.land/x/wait@0.1.12/mod.ts";
 export {
   blue,
   bold,
