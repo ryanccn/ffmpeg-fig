@@ -71,7 +71,7 @@ const updateREADME = async () => {
 
   const newREADME = oldREADME.content.split("\n").map((line) => {
     if (line.startsWith("**Last updated:")) {
-      return `**Last updated: ${new Date().toUTCString()}`;
+      return `**Last updated: ${new Date().toUTCString()}**`;
     }
     return line;
   }).join("\n");
@@ -87,8 +87,6 @@ const updateREADME = async () => {
       }),
     },
   );
-
-  stepEnd("readme");
 };
 
 stepStart("read-file", "Reading two versions of the files");
@@ -150,5 +148,7 @@ stepEnd("pr");
 stepStart("readme", "Updating README");
 
 await updateREADME();
+
+stepEnd("readme");
 
 console.log(bold(green("done!")));

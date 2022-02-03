@@ -18,10 +18,10 @@ const genOptions: Fig.Option[] = [{
   name: "-i",
   description: "Input file",
   isRequired: true,
-  args: [{
+  args: {
     name: "infile",
     template: "filepaths",
-  }],
+  },
 }];
 
 timeStart("parseOptions");
