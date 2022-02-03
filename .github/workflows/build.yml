@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: jurassiscripts/setup-velociraptor@v2
 
+      - name: Install FFmpeg
+        run: sudo apt-get install ffmpeg
+
       - name: Build the spec
         run: vr build
 
