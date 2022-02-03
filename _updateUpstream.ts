@@ -35,7 +35,10 @@ const fetchGitHub = async (
   );
 
   if (!r.ok) {
-    throw new Error(`requesting ${path} failed with status code ${r.status}`);
+    throw new Error(
+      `requesting ${path} failed with status code ${r.status}, text ${await r
+        .text()}`,
+    );
   }
 
   return await r.json();
@@ -59,23 +62,40 @@ const stepEnd = (id: string) => {
   delete stepStartTimes[id];
 };
 
-stepStart("check-pr", "Checking for existing PRs...");
-const existingPulls: unknown[] = await fetchGitHub(
-  `/repos/withfig/autocomplete/pulls?head=${
-    encodeURIComponent("ryanccn-bot:master")
-  }`,
-);
-if (existingPulls.length > 0) {
-  console.warn(yellow("PR already exists, exiting"));
-  Deno.exit(0);
-}
-stepEnd("check-pr");
+/** Update the README */
+const updateREADME = async () => {
+  const oldREADME: { content: string; sha: string } = await fetchGitHub(
+    "/repos/ryanccn/ffmpeg-fig/contents/README.md",
+  );
+  oldREADME.content = new TextDecoder().decode(decode(oldREADME.content));
+
+  const newREADME = oldREADME.content.split("\n").map((line) => {
+    if (line.startsWith("**Last updated:")) {
+      return `**Last updated: ${new Date().toUTCString()}`;
+    }
+    return line;
+  }).join("\n");
+
+  await fetchGitHub(
+    "/repos/ryanccn/ffmpeg-fig/contents/README.md",
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        message: "chore(automated): update README",
+        content: encode(newREADME),
+        sha: oldREADME.sha,
+      }),
+    },
+  );
+
+  stepEnd("readme");
+};
 
 stepStart("read-file", "Reading two versions of the files");
 
 const newContents = await Deno.readTextFile("./ffmpeg.ts");
 const oldContents: { content: string; sha: string } = await fetchGitHub(
-  "/repos/withfig/autocomplete/contents/src/ffmpeg.ts",
+  "/repos/ryanccn-bot/autocomplete/contents/src/ffmpeg.ts",
 );
 oldContents.content = new TextDecoder().decode(decode(oldContents.content));
 
@@ -85,28 +105,6 @@ if (oldContents.content === newContents) {
   console.warn(yellow("Content of files are same, no need to open PR"));
   Deno.exit(0);
 }
-
-stepStart("create-fork", "Creating a fork of withfig/autocomplete");
-
-await fetchGitHub(
-  "/repos/withfig/autocomplete/forks",
-  {
-    method: "POST",
-    headers: {
-      "Accept": "application/vnd.github.v3+json",
-    },
-  },
-);
-
-stepEnd("create-fork");
-
-stepStart("waiting", "Waiting 15s for the fork to finalize");
-
-await new Promise((resolve) => {
-  setTimeout(resolve, 15 * 1000);
-});
-
-stepEnd("waiting");
 
 stepStart("push", "Pushing the changes to the fork");
 
@@ -126,45 +124,31 @@ stepEnd("push");
 
 stepStart("pr", "Creating pull request");
 
-await fetchGitHub(
-  "/repos/withfig/autocomplete/pulls",
-  {
-    method: "POST",
-    body: JSON.stringify({
-      title: "automated update of ffmpeg.ts",
-      head: "ryanccn-bot:master",
-      base: "master",
-    }),
-  },
+const existingPulls: unknown[] = await fetchGitHub(
+  `/repos/withfig/autocomplete/pulls?head=${
+    encodeURIComponent("ryanccn-bot:master")
+  }`,
 );
+if (existingPulls.length === 0) {
+  await fetchGitHub(
+    "/repos/withfig/autocomplete/pulls",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        title: "automated update of ffmpeg.ts",
+        head: "ryanccn-bot:master",
+        base: "master",
+      }),
+    },
+  );
+} else {
+  console.warn(yellow("PR already exists, not creating a new one"));
+}
 
 stepEnd("pr");
 
 stepStart("readme", "Updating README");
 
-const oldREADME: { content: string; sha: string } = await fetchGitHub(
-  "/repos/withfig/autocomplete/contents/src/ffmpeg.ts",
-);
-oldREADME.content = new TextDecoder().decode(decode(oldContents.content));
-const newREADME = oldREADME.content.split("\n").map((line) => {
-  if (line.startsWith("**Last updated:")) {
-    return `**Last updated: ${new Date().toUTCString()}`;
-  }
-  return line;
-}).join("\n");
-
-await fetchGitHub(
-  "/repos/ryanccn/ffmpeg-fig/contents/README.md",
-  {
-    method: "PUT",
-    body: JSON.stringify({
-      message: "chore(automated): update README",
-      content: encode(newREADME),
-      sha: oldREADME.sha,
-    }),
-  },
-);
-
-stepEnd("readme");
+await updateREADME();
 
 console.log(bold(green("done!")));

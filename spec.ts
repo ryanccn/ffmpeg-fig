@@ -87,6 +87,7 @@ const completionSpec: Fig.Spec = {
           : ""
       }
       ${option.deprecated ? `deprecated: true,` : ""}
+      ${option.isRequired ? `isRequired: true,` : ""}
       ${
         option.args && !Array.isArray(option.args) && option.args.name
           ? `
