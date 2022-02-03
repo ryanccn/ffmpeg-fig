@@ -7,10 +7,17 @@ export default <ScriptsConfiguration> {
       allow: ["all"],
       desc: "Just build the spec",
     },
+
     copy: {
       cmd:
         "cp ffmpeg.ts ~/.fig/autocomplete/src && cd ~/.fig/autocomplete && npm run build",
       desc: "Copy the built spec to Fig",
+    },
+
+    "update-upstream": {
+      cmd: "_updateUpstream.ts",
+      allow: ["all"],
+      desc: "Use ryanccn-bot to update the upstream at @withfig",
     },
   },
 };

@@ -1,0 +1,18 @@
+name: daily-rebuild
+
+on:
+  schedule:
+    - cron: "30 8 * * *"
+  push:
+
+jobs:
+  everything:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jurassiscripts/setup-velociraptor@v2
+
+      - name: Build the spec
+        run: vr build
+
+      - name: Open a PR (if necessary)
+        run: vr update-upstream
