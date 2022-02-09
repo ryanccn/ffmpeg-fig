@@ -2,7 +2,7 @@ name: daily-rebuild
 
 on:
   schedule:
-    - cron: "30 8 * * *"
+    - cron: '30 8 * * *'
   push:
 
 jobs:
@@ -17,7 +17,26 @@ jobs:
       - name: Build the spec
         run: vr build
 
-      - name: Open a PR (if necessary)
-        run: vr update-upstream
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      - name: Clone the fork
+        uses: actions/checkout@v2
+        with:
+          repository: 'ryanccn-bot/autocomplete'
+          token: ${{ secrets.bot_token }}
+          path: fig-fork
+          persist-crendentials: false
+          fetch-depth: 0
+
+      - name: Copy the file
+        run: cp ffmpeg.ts fig-fork/src/ffmpeg.ts
+
+      - name: Run lint:fix
+        run: cd fig-fork && npm ci && npm run lint:fix
+
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.bot_token }}
+          author_email: '98804099+ryanccn-bot@users.noreply.github.com'
+          author_name: 'ryanccn-bot'
+          directory: 'fig-fork'
+          repository: 'ryanccn-bot/autocomplete'

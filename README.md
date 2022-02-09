@@ -1,7 +1,5 @@
 # ffmpeg-fig
 
-**Last updated: Thu, 03 Feb 2022 12:14:18 GMT**
-
 A Deno script that generates FFmpeg's Fig completion spec!
 
 A GitHub Action builds the spec every day and opens a PR if necessary to [withfig/autocomplete](https://github.com/withfig/autocomplete) via my bot, [@ryanccn-bot](https://github.com/ryanccn-bot).
