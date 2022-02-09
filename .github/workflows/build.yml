@@ -11,34 +11,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: jurassiscripts/setup-velociraptor@v2
+        with:
+          checkout: false
+
+      - name: Clone the generator (this repo)
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.github_token }}
+          path: generator
+          persist-credentials: false
+          fetch-depth: 0
 
       - name: Install FFmpeg
         run: sudo apt-get install ffmpeg
 
       - name: Build the spec
-        run: vr build
+        run: cd generator && vr build
 
       - name: Clone the fork
         uses: actions/checkout@v2
         with:
           repository: 'ryanccn-bot/autocomplete'
           token: ${{ secrets.bot_token }}
-          path: fig-fork
           persist-credentials: false
           fetch-depth: 0
 
       - name: Copy the file
-        run: cp ffmpeg.ts fig-fork/src/ffmpeg.ts
+        run: cp generator/ffmpeg.ts src/ffmpeg.ts
 
-      - name: Run lint:fix
-        run: cd fig-fork && npm i && npm run lint:fix
+      - name: Delete the generator
+        run: rm -rf generator/
 
-      - name: Commit & Push changes
-        uses: actions-js/push@master
+      - name: npm run lint:fix
+        run: npm i && npm run lint:fix
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
         with:
-          github_token: ${{ secrets.bot_token }}
-          author_email: '98804099+ryanccn-bot@users.noreply.github.com'
-          author_name: 'ryanccn-bot'
-          directory: 'fig-fork'
-          repository: 'ryanccn-bot/autocomplete'
-          branch: 'ffmpeg-autoupdate'
+          token: ${{ secrets.bot_token }}
+          commit-message: 'chore(ffmpeg): automated update'
+          committer: ryanccn-bot <98804099+ryanccn-bot@users.noreply.github.com>
+          author: ryanccn-bot <98804099+ryanccn-bot@users.noreply.github.com>
+          branch: ffmpeg-autoupdate
+          title: 'automated update of `ffmpeg`'
