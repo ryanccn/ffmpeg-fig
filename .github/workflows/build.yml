@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '30 8 * * *'
   push:
+  workflow_dispatch:
 
 jobs:
   everything:
@@ -23,7 +24,7 @@ jobs:
           repository: 'ryanccn-bot/autocomplete'
           token: ${{ secrets.bot_token }}
           path: fig-fork
-          persist-crendentials: false
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Copy the file
@@ -40,3 +41,4 @@ jobs:
           author_name: 'ryanccn-bot'
           directory: 'fig-fork'
           repository: 'ryanccn-bot/autocomplete'
+          branch: 'ffmpeg-autoupdate'
