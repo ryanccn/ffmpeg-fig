@@ -30,7 +30,7 @@ jobs:
         run: cp ffmpeg.ts fig-fork/src/ffmpeg.ts
 
       - name: Run lint:fix
-        run: cd fig-fork && npm ci && npm run lint:fix
+        run: cd fig-fork && npm i && npm run lint:fix
 
       - name: Commit & Push changes
         uses: actions-js/push@master
