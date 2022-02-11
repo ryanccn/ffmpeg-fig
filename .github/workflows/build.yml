@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install FFmpeg
-        run: sudo apt-get install ffmpeg
+        run: sudo apt-get update && sudo apt-get install ffmpeg
 
       - name: Build the spec
         run: cd generator && vr build
