@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0
 
       - name: Copy the file
-        run: cp generator/ffmpeg.ts src/ffmpeg.ts
+        run: cp ffmpeg.ts src/ffmpeg.ts
 
       - name: Delete the generator
         run: rm -rf generator/

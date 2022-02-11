@@ -5,7 +5,7 @@ import { generateSpec } from "./spec.ts";
 import { codecGenerator, deviceGenerator } from "./generators.ts";
 
 import { timeEnd, timeStart } from "./utils.ts";
-import { bold, green } from "./_deps.ts";
+import { bold, green, join } from "./_deps.ts";
 
 const HELP_TEXT = await getHelpText();
 const HELP_LINES = HELP_TEXT.split("\n").filter(Boolean);
@@ -61,7 +61,7 @@ timeEnd("parseOptions");
 const generatedSpec = await generateSpec(genOptions);
 
 timeStart("writeFile");
-await Deno.writeTextFile("ffmpeg.ts", generatedSpec);
+await Deno.writeTextFile(join(Deno.cwd(), "ffmpeg.ts"), generatedSpec);
 timeEnd("writeFile");
 
 console.log(green(`Wrote completion spec to ${bold("./ffmpeg.ts")}`));
